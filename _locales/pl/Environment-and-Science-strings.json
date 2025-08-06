@@ -3,6 +3,7 @@
     "Environment.DHT11Type.DHT11_temperature_F|block": "temperatura(℉)",
     "Environment.DHT11Type.DHT11_humidity|block": "wilgotność(0~100)",
     "Environment.BMP388_state.BMP388_temperature_C|block": "temperatura(℃)",
+    "Environment.BMP388_state.BMP388_humidity|block": "wilgotność(0~100)",
     "Environment.BMP388_state.BMP388_pressure|block": "ciśnienie(hPa)",
     "Environment.BMP388_state.BMP388_altitude|block": "wysokość(M)",
     "Environment|block": "Oktopod",
