@@ -1,13 +1,10 @@
 
 .. toctree::
    :maxdepth: 3
-   :caption: keyestudio docs
+   :caption: dddddddddddddddddddd
 
    README.md
-   docs/keyestudio/index
-
-
-
+   docs/FB0002 foxbit T型机器人扩展板
 
 
 
