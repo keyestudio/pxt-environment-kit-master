@@ -35,12 +35,12 @@ namespace Environment {
     setreg(0xF5, 0x0C)
     setreg(0xF4, 0x2F)
 
-    // Stores compensation values for Temperature (must be read from BMP388 NVM)
+    // Stores compensation values for Temperature (must be read from BME280 NVM)
     let digT1Val = 0
     let digT2Val = 0
     let digT3Val = 0
 
-    // Stores compensation values for humidity (must be read from BMP388 NVM)
+    // Stores compensation values for humidity (must be read from BME280 NVM)
     let digH1Val = 0
     let digH2Val = 0
     let digH3Val = 0
@@ -148,6 +148,14 @@ namespace Environment {
         var1 = (dig_P9 * (((_p >> 3) * (_p >> 3)) >> 13)) >> 12
         var2 = (((_p >> 2)) * dig_P8) >> 13
         P = _p + ((var1 + var2 + dig_P7) >> 4)
+        let adc_H = (getreg(0xFD) << 8) + getreg(0xFE)
+        var1 = t - 76800
+        var2 = (((adc_H << 14) - (dig_H4 << 20) - (dig_H5 * var1)) + 16384) >> 15
+        var1 = var2 * (((((((var1 * dig_H6) >> 10) * (((var1 * dig_H3) >> 11) + 32768)) >> 10) + 2097152) * dig_H2 + 8192) >> 14)
+        var2 = var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * dig_H1) >> 4)
+        if (var2 < 0) var2 = 0
+        if (var2 > 419430400) var2 = 419430400
+        H = (var2 >> 12) / 1024
     }
 
     ////////////////////////////////////////////////////////NFC////////////////////////////////////////////
@@ -367,6 +375,35 @@ namespace Environment {
     }
 
     /**
+     * get dust value (μg/m³) 
+     * @param vLED describe parameter here
+     * @param vo describe parameter here
+     */
+    //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
+    export function ReadDust(vLED: DigitalPin, vo: AnalogPin): number {
+        let voltage = 0;
+        let dust = 0;
+        pins.digitalWritePin(vLED, 0);
+        control.waitMicros(160);
+        voltage = pins.analogReadPin(vo);
+        control.waitMicros(100);
+        pins.digitalWritePin(vLED, 1);
+        voltage = pins.map(
+            voltage,
+            0,
+            1023,
+            0,
+            Reference_VOLTAGE
+        );
+        dust = (voltage - 380) * 5 / 29;
+        if (dust < 0) {
+            dust = 0
+        }
+        return Math.round(dust)
+
+    }
+
+    /**
      * get soil moisture value (0~100)
      * @param soilmoisturepin describe parameter here
      */
@@ -447,10 +484,11 @@ namespace Environment {
         }
         return 0;
     }
+
     /**
-* get UV level value (0~15)
-* @param waterlevelpin describe parameter here
-*/
+    * get UV level value (0~15)
+    * @param UVlevel pin describe parameter here
+    */
     //% blockId="readUVLevel" block="UV sensor %Rjpin level(0~15)"
     export function UVLevel(pin: AnalogPin): number {
         let UVlevel = pins.analogReadPin(pin);
