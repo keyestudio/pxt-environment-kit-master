@@ -1,8 +1,8 @@
 {
     "Environment.UVLevel|block": "紫外線感測器 %Rjpin 強度(0~15)",
     "Environment.octopus_BMP388|block": "BMP388感測器 的 %state 值",
-    "Environment.ReadWaterLevel|block": "連接至 %waterlevelpin 的 水位值(0~100)",
-    "Environment.ReadSoilHumidity|block": "連接至 %soilhumiditypin 的土壤濕度值(0~100)",
+    "Environment.ReadFireLevel|block": "連接至 %firelevelpin 的 火焰值(0~100)",
+    "Environment.ReadMq-2Gas|block": "連接至 %mq-2gaspin 的MQ-2模拟气体值(0~100)",
     "Environment.ReadDust|block": "連接至 LED %vLED| out %vo 的灰塵量(μg/m³)",
     "Environment.DHT11Type.DHT11_humidity|block": "濕度(0~100)",
     "Environment.DHT11Type.DHT11_temperature_C|block": "攝氏溫度(℃)",

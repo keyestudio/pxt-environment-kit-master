@@ -416,41 +416,41 @@ namespace Environment {
     }
 
     /**
-     * get soil moisture value (0~100)
-     * @param soilmoisturepin describe parameter here
+     * get mq-2 gas value (0~100)
+     * @param mq-2gaspin describe parameter here
      */
-    //% blockId="readsoilmoisture" block="value of soil moisture(0~100) at pin %soilhumiditypin"
-    export function ReadSoilHumidity(soilmoisturepin: AnalogPin): number {
+    //% blockId="readmq-2gas" block="value of mq-2 gas(0~100) at pin %mq-2gaspin"
+    export function ReadMq-2Gas(mq-2gaspin: AnalogPin): number {
         let voltage = 0;
-        let soilmoisture = 0;
+        let mq-2gas = 0;
         voltage = pins.map(
-            pins.analogReadPin(soilmoisturepin),
+            pins.analogReadPin(mq-2gaspin),
             0,
             1023,
             0,
             100
         );
-        soilmoisture = voltage;
-        return Math.round(soilmoisture)
+        mq-2gas = voltage;
+        return Math.round(mq-2gas)
     }
 
     /**
-     * get water level value (0~100)
-     * @param waterlevelpin describe parameter here
+     * get fire level value (0~100)
+     * @param firelevelpin describe parameter here
      */
-    //% blockId="readWaterLevel" block="value of water level(0~100) at pin %waterlevelpin"
-    export function ReadWaterLevel(waterlevelpin: AnalogPin): number {
+    //% blockId="readFireLevel" block="value of fire level(0~100) at pin %firelevelpin"
+    export function ReadFireLevel(firelevelpin: AnalogPin): number {
         let voltage = 0;
-        let waterlevel = 0;
+        let firelevel = 0;
         voltage = pins.map(
-            pins.analogReadPin(waterlevelpin),
+            pins.analogReadPin(firelevelpin),
             0,
             1023,
             0,
             100
         );
-        waterlevel = voltage;
-        return Math.round(waterlevel)
+        firelevel = voltage;
+        return Math.round(firelevel)
     }
 
     /**
