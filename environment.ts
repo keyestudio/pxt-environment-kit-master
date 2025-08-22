@@ -416,22 +416,22 @@ namespace Environment {
     }
 
     /**
-     * get mq-2 gas value (0~100)
-     * @param mq-2gaspin describe parameter here
+     * get analog gas value (0~100)
+     * @param analoggaspin describe parameter here
      */
-    //% blockId="readmq-2gas" block="value of mq-2 gas(0~100) at pin %mq-2gaspin"
-    export function ReadMq-2Gas(mq-2gaspin: AnalogPin): number {
+    //% blockId="readanaloggas" block="value of analoggas(0~100) at pin %analoggaspin"
+    export function ReadAnalogGas(analoggaspin: AnalogPin): number {
         let voltage = 0;
-        let mq-2gas = 0;
+        let analoggas = 0;
         voltage = pins.map(
-            pins.analogReadPin(mq-2gaspin),
+            pins.analogReadPin(analoggaspin),
             0,
             1023,
             0,
             100
         );
-        mq-2gas = voltage;
-        return Math.round(mq-2gas)
+        analoggas = voltage;
+        return Math.round(analoggas)
     }
 
     /**
