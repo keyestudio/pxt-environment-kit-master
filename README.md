@@ -4,7 +4,7 @@ Environment and Science  package is developed under the cooperation of [KEYESTUD
 
 The KEYESTUDIO Environment and Science Kit can detect all kinds of environment data like temperature, humidity, soil moisture , and so on. 
 
-![](https://github.com/keyestudio/pxt-environment/blob/master/icon.jpg)
+![](https://github.com/keyestudio/pxt-environment-kit-master/icon.jpg)
 
 ## Hardware list 
 
