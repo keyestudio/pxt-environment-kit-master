@@ -391,7 +391,7 @@ namespace Environment {
      * @param vLED describe parameter here
      * @param vo describe parameter here
      */
-    //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
+    //% blockId="readdust" block="value of PM2.5 dust(μg/m³) at LED %vLED| out %vo"
     export function ReadDust(vLED: DigitalPin, vo: AnalogPin): number {
         let voltage = 0;
         let dust = 0;
@@ -419,7 +419,7 @@ namespace Environment {
      * get analog gas value (0~100)
      * @param analoggaspin describe parameter here
      */
-    //% blockId="readanaloggas" block="value of analoggas(0~100) at pin %analoggaspin"
+    //% blockId="readanaloggas" block="value of analog gas(0~100) at pin %analoggaspin"
     export function ReadAnalogGas(analoggaspin: AnalogPin): number {
         let voltage = 0;
         let analoggas = 0;
@@ -457,7 +457,7 @@ namespace Environment {
      * get rain fall value (0~100)
      * @param rainfall pin describe parameter here
      */
-    //% blockId="readRainFall" block="value of rain fall(0~100) at pin %rainfall pin"
+    //% blockId="readRainFall" block="value of rainfall(0~100) at pin %rainfall pin"
     export function ReadRainFall(rainfallpin: AnalogPin): number {
         let voltage = 0;
         let rainfall = 0;
