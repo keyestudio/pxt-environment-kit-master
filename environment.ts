@@ -391,7 +391,7 @@ namespace Environment {
      * @param vLED describe parameter here
      * @param vo describe parameter here
      */
-    //% blockId="readdust" block="value of PM2.5 dust(μg/m³) at LED %vLED| out %vo"
+    //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
     export function ReadDust(vLED: DigitalPin, vo: AnalogPin): number {
         let voltage = 0;
         let dust = 0;

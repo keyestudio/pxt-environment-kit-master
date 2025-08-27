@@ -1,0 +1,16 @@
+{
+  "Environment": "Custom blocks",
+  "Environment.ReadDust": "get dust value (μg/m³)",
+  "Environment.ReadDust|param|vLED": "describe parameter here, eg: DigitalPin.P16",
+  "Environment.ReadDust|param|vo": "describe parameter here, eg: AnalogPin.P1",
+  "Environment.ReadFireLevel": "get fire level value (0~100)",
+  "Environment.ReadFireLevel|param|firelevelpin": "describe parameter here, eg: AnalogPin.P1",
+  "Environment.ReadAnalogGas": "get analog gas value (0~100)",
+  "Environment.ReadAnalogGas|param|analoggaspin": "describe parameter here, eg: AnalogPin.P1",
+  "Environment.RainFall": "get rain fall value (0~100)",
+  "Environment.ReadRainFall|param|rainfallpin": "describe parameter here, eg: AnalogPin.P1",
+  "Environment.UVLevel": "UV sensor %pin level(0~15)",
+  "Environment.ReadUVLevel|param|uvlevelpin": "describe parameter here, eg: AnalogPin.P1",
+  "Environment.dht11value": "get dht11 temperature and humidity Value",
+  "Environment.dht11value|param|dht11pin": "describe parameter here, eg: DigitalPin.P15"
+}
