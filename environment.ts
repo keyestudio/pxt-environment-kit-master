@@ -504,13 +504,13 @@ namespace Environment {
     //% blockId="readUVLevel" block="UV sensor %Rjpin level(0~15)"
     export function UVLevel(pin: AnalogPin): number {
         let UVlevel = pins.analogReadPin(pin);
-        if (UVlevel > 625) {
-            UVlevel = 625
+        if (UVlevel > 1023) {
+            UVlevel = 1023
         }
         UVlevel = pins.map(
             UVlevel,
             0,
-            625,
+            1023,
             0,
             15
         );
