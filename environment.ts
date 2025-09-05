@@ -444,8 +444,8 @@ namespace Environment {
         let firelevel = 0;
         voltage = pins.map(
             pins.analogReadPin(firelevelpin),
-            0,
             1023,
+            0,
             0,
             100
         );
