@@ -457,7 +457,7 @@ namespace Environment {
      * get rain fall value (0~100)
      * @param rainfall pin describe parameter here
      */
-    //% blockId="readRainFall" block="value of rainfall(0~100) at pin %rainfall pin"
+    //% blockId="readRainFall" block="value of rainfall(0~100) at pin %rainfallpin"
     export function ReadRainFall(rainfallpin: AnalogPin): number {
         let voltage = 0;
         let rainfall = 0;
