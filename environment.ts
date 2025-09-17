@@ -391,28 +391,79 @@ namespace Environment {
      * @param vLED describe parameter here
      * @param vo describe parameter here
      */
-    //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
-    export function ReadDust(vLED: DigitalPin, vo: AnalogPin): number {
-        let voltage = 0;
-        let dust = 0;
-        pins.digitalWritePin(vLED, 0);
-        control.waitMicros(160);
-        voltage = pins.analogReadPin(vo);
-        control.waitMicros(100);
-        pins.digitalWritePin(vLED, 1);
-        voltage = pins.map(
-            voltage,
-            0,
-            1023,
-            0,
-            Reference_VOLTAGE
-        );
-        dust = (voltage - 380) * 5 / 29;
-        if (dust < 0) {
-            dust = 0
+    //% weight=90 color=#009900 icon="\uf0e7" block="PM2.5 Advanced"
+    namespace pm25Advanced {
+        let baselineVoltage = 0.0356;
+        
+        /**
+         * 设置基准电压（用于校准）
+         * @param voltage 基准电压值
+         */
+        //% block="设置基准电压 %voltage V"
+        //% voltage.min=0 voltage.max=3.3 voltage.defl=0.0356
+        export function setBaselineVoltage(voltage: number): void {
+            baselineVoltage = voltage;
         }
-        return Math.round(dust)
-
+        
+        /**
+         * 自动校准基准电压
+         * @param vLED LED引脚
+         * @param vo 输出引脚
+         */
+        //% block="自动校准 LED %vLED 输出 %vo"
+        export function autoCalibrate(vLED: DigitalPin, vo: AnalogPin): void {
+            let voltages: number[] = [];
+            const samples = 20;
+            
+            for (let i = 0; i < samples; i++) {
+                let raw = readRawValue(vLED, vo);
+                let voltage = raw * (3.3 / 1023.0);
+                voltages.push(voltage);
+                basic.pause(100);
+            }
+            
+            // 排序并取中间值
+            voltages.sort();
+            baselineVoltage = voltages[Math.idiv(samples, 2)];
+            
+            serial.writeValue("新基准电压", baselineVoltage);
+        }
+        
+        function readRawValue(vLED: DigitalPin, vo: AnalogPin): number {
+            pins.digitalWritePin(vLED, 0);
+            control.waitMicros(280);
+            let value = pins.analogReadPin(vo);
+            control.waitMicros(40);
+            pins.digitalWritePin(vLED, 1);
+            control.waitMicros(9680);
+            return value;
+        }
+        
+        /**
+         * 读取带滤波的PM2.5值
+         * @param vLED LED引脚
+         * @param vo 输出引脚
+         */
+        //% block="读取滤波PM2.5 LED %vLED 输出 %vo"
+        export function readFilteredPM25(vLED: DigitalPin, vo: AnalogPin): number {
+            let values: number[] = [];
+            
+            // 采样5次
+            for (let i = 0; i < 5; i++) {
+                let raw = readRawValue(vLED, vo);
+                let voltage = raw * (3.3 / 1023.0);
+                if (voltage > baselineVoltage) {
+                    values.push((voltage - baselineVoltage) * 4200);
+                } else {
+                    values.push(0);
+                }
+                basic.pause(50);
+            }
+            
+            // 中值滤波
+            values.sort();
+            return values[2]; // 返回中值
+        }
     }
 
     /**
