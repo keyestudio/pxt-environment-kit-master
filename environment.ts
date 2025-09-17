@@ -387,33 +387,32 @@ namespace Environment {
     }
 
 /**
-     * 读取PM2.5粉尘浓度值 (μg/m³) - 使用夏普官方公式
-     * @param vLED LED控制引脚
-     * @param vo 传感器输出引脚
+     * Read PM2.5 dust concentration value (μg/m³) - Use the official Sharp formula
+     * @param vLED LED control pin
+     * @param vo Sensor output pin
      */
     //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
     export function readPM25Dust(vLED: DigitalPin, vo: AnalogPin): number {
-        // 严格按照Arduino代码的时序
-        pins.digitalWritePin(vLED, 0);      // LED低电平
-        control.waitMicros(280);            // 280μs延迟
+        pins.digitalWritePin(vLED, 0);      // LED low voltage
+        control.waitMicros(280);            // 280 μs delay
         
-        // 读取模拟值
+        // Read the analog value
         let analogValue = pins.analogReadPin(vo);
-        control.waitMicros(40);             // 40μs延迟
+        control.waitMicros(40);             // 40 μs delay
         
-        pins.digitalWritePin(vLED, 1);      // LED高电平
-        control.waitMicros(9680);           // 9680μs延迟
+        pins.digitalWritePin(vLED, 1);      // High-level LED
+        control.waitMicros(9680);           // 9680 μs delay
         
-        // 转换为电压 (0-3.3V)
+        // Convert to voltage (0 - 3.3V)
         let voltage = analogValue / 1024.0 ;
         
-        // 使用夏普官方公式: pm25 = (voltage - 0.0356) * 120000 * 0.035
+        // Using the official formula of Sharp: pm25 = (voltage - 0.0356) * 120000 * 0.035
         let dust = 0;
         if (analogValue > 36.455) {
             dust = (voltage - 0.0356) * 120000 * 0.035;
         }
         
-        // 确保不为负值
+        // Make sure it is not a negative value.
         return Math.max(0, dust);
     }
 
