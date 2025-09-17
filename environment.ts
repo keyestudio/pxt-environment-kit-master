@@ -405,11 +405,11 @@ namespace Environment {
         control.waitMicros(9680);           // 9680μs延迟
         
         // 转换为电压 (0-3.3V)
-        let voltage = analogValue * (Reference_VOLTAGE / 1023.0);
+        let voltage = analogValue * / 1023.0 ;
         
         // 使用夏普官方公式: pm25 = (voltage - 0.0356) * 120000 * 0.035
         let dust = 0;
-        if (voltage > 0.0356) {
+        if (analogValue > 36.455) {
             dust = (voltage - 0.0356) * 120000 * 0.035;
         }
         
