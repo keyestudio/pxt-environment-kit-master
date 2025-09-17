@@ -386,7 +386,7 @@ namespace Environment {
         }
     }
 
-/**
+    /**
      * Read PM2.5 dust concentration value (μg/m³) - Use the official Sharp formula
      * @param vLED LED control pin
      * @param vo Sensor output pin
@@ -404,7 +404,7 @@ namespace Environment {
         control.waitMicros(9680);           // 9680 μs delay
         
         // Convert to voltage (0 - 3.3V)
-        let voltage = analogValue / 1024.0 ;
+        let voltage = analogValue / 1024.0;
         
         // Using the official formula of Sharp: pm25 = (voltage - 0.0356) * 120000 * 0.035
         let dust = 0;
