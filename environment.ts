@@ -413,8 +413,8 @@ namespace Environment {
             dust = (voltage - 0.0356) * 120000 * 0.035;
         }
         
-        // 确保不为负值并四舍五入
-        return Math.max(0, Math.round(dust));
+        // 确保不为负值
+        return Math.max(0, dust);
     }
 
     /**
