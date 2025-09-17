@@ -386,83 +386,35 @@ namespace Environment {
         }
     }
 
-    //% weight=100 color=#ff6600 icon="\uf0c2" block="PM2.5 Sensor"
-    namespace pm25Sensor {
-        // 参考电压 (micro:bit使用3.3V)
-        const Reference_VOLTAGE = 3.3;
-        // 基准电压常数 (根据夏普传感器数据手册)
-        const BASELINE_VOLTAGE = 0.0356;
-        // 转换系数 (120000 * 0.035 = 4200)
-        const CONVERSION_FACTOR = 4200;
+/**
+     * 读取PM2.5粉尘浓度值 (μg/m³) - 使用夏普官方公式
+     * @param vLED LED控制引脚
+     * @param vo 传感器输出引脚
+     */
+    //% blockId="readdust" block="value of dust(μg/m³) at LED %vLED| out %vo"
+    export function readPM25Dust(vLED: DigitalPin, vo: AnalogPin): number {
+        // 严格按照Arduino代码的时序
+        pins.digitalWritePin(vLED, 0);      // LED低电平
+        control.waitMicros(280);            // 280μs延迟
         
-        /**
-         * 读取PM2.5粉尘浓度值 (μg/m³) - 使用夏普官方公式
-         * @param vLED LED控制引脚
-         * @param vo 传感器输出引脚
-         */
-        //% block="读取PM2.5浓度 LED引脚 %vLED 输出引脚 %vo"
-        //% blockId="read_pm25_dust"
-        export function readPM25Dust(vLED: DigitalPin, vo: AnalogPin): number {
-            // 严格按照Arduino代码的时序
-            pins.digitalWritePin(vLED, 0);      // LED低电平
-            control.waitMicros(280);            // 280μs延迟
-            
-            // 读取模拟值
-            let analogValue = pins.analogReadPin(vo);
-            control.waitMicros(40);             // 40μs延迟
-            
-            pins.digitalWritePin(vLED, 1);      // LED高电平
-            control.waitMicros(9680);           // 9680μs延迟
-            
-            // 转换为电压 (0-3.3V)
-            let voltage = analogValue * (Reference_VOLTAGE / 1023.0);
-            
-            // 使用夏普官方公式: pm25 = (voltage - 0.0356) * 120000 * 0.035
-            let dust = 0;
-            if (voltage > BASELINE_VOLTAGE) {
-                dust = (voltage - BASELINE_VOLTAGE) * CONVERSION_FACTOR;
-            }
-            
-            // 确保不为负值并四舍五入
-            return Math.max(0, Math.round(dust));
+        // 读取模拟值
+        let analogValue = pins.analogReadPin(vo);
+        control.waitMicros(40);             // 40μs延迟
+        
+        pins.digitalWritePin(vLED, 1);      // LED高电平
+        control.waitMicros(9680);           // 9680μs延迟
+        
+        // 转换为电压 (0-3.3V)
+        let voltage = analogValue * (Reference_VOLTAGE / 1023.0);
+        
+        // 使用夏普官方公式: pm25 = (voltage - 0.0356) * 120000 * 0.035
+        let dust = 0;
+        if (voltage > 0.0356) {
+            dust = (voltage - 0.0356) * 120000 * 0.035;
         }
-
-        /**
-         * 读取传感器电压值
-         * @param vLED LED控制引脚
-         * @param vo 传感器输出引脚
-         */
-        //% block="读取传感器电压 LED引脚 %vLED 输出引脚 %vo"
-        //% blockId="read_sensor_voltage"
-        export function readSensorVoltage(vLED: DigitalPin, vo: AnalogPin): number {
-            pins.digitalWritePin(vLED, 0);
-            control.waitMicros(280);
-            let rawValue = pins.analogReadPin(vo);
-            control.waitMicros(40);
-            pins.digitalWritePin(vLED, 1);
-            control.waitMicros(9680);
-            
-            // 转换为电压并保留3位小数
-            let voltage = rawValue * (Reference_VOLTAGE / 1023.0);
-            return Math.round(voltage * 1000) / 1000;
-        }
-
-        /**
-         * 读取原始模拟值
-         * @param vLED LED控制引脚
-         * @param vo 传感器输出引脚
-         */
-        //% block="读取原始模拟值 LED引脚 %vLED 输出引脚 %vo"
-        //% blockId="read_raw_analog"
-        export function readRawAnalog(vLED: DigitalPin, vo: AnalogPin): number {
-            pins.digitalWritePin(vLED, 0);
-            control.waitMicros(280);
-            let rawValue = pins.analogReadPin(vo);
-            control.waitMicros(40);
-            pins.digitalWritePin(vLED, 1);
-            control.waitMicros(9680);
-            return rawValue;
-        }
+        
+        // 确保不为负值并四舍五入
+        return Math.max(0, Math.round(dust));
     }
 
     /**
