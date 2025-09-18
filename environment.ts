@@ -299,9 +299,17 @@ namespace Environment {
         return 1
     }
 
-    let __dht11_last_read_time = 0;
-    let __temperature: number = 0
-    let __humidity: number = 0
+    // global variable
+    let __temperature: number = 0; // Set the initial value to 0
+    let __humidity: number = 0;    // Set the initial value to 0
+    let __dht11_last_read_time: number = 0;
+    let __sensor_initialized: boolean = false;
+
+    enum DHT11Type {
+        DHT11_temperature_C = 0,
+        DHT11_temperature_F = 1,
+        DHT11_humidity = 2
+    }
 
     /**
      * get dht11 temperature and humidity Value
@@ -309,80 +317,214 @@ namespace Environment {
      */
     //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
     export function dht11value(dht11type: DHT11Type, dht11pin: DigitalPin): number {
-        //initialize
-        if (__dht11_last_read_time != 0 && __dht11_last_read_time + 1000 > input.runningTime()) {
-            switch (dht11type) {
-                case DHT11Type.DHT11_temperature_C:
-                    return __temperature
-                case DHT11Type.DHT11_temperature_F:
-                    return (__temperature * 1.8) + 32
-                case DHT11Type.DHT11_humidity:
-                    return __humidity
-                default:
-                    return 0
+        // Sensor initialization
+        if (!__sensor_initialized) {
+            initializeSensor(dht11pin);
+            __sensor_initialized = true;
+            return getDefaultValue(dht11type); // Return the default value for the first time
+        }
+        
+        // Use cached data (valid within 1.5 seconds)
+        if (__dht11_last_read_time != 0 && input.runningTime() - __dht11_last_read_time < 1500) {
+            return getCachedValue(dht11type);
+        }
+        
+        // Read sensor data
+        let success = readSensorData(dht11pin);
+        
+        if (!success) {
+            // Read failed. Use the last valid value (if available)
+            if (__temperature < 0 || __humidity < 0) {
+                return getDefaultValue(dht11type);
             }
         }
-        let fail_flag: number = 0
-        let pin = dht11pin
-        pins.setPull(pin, PinPullMode.PullUp)
-        for (let count = 0; count < (__dht11_last_read_time == 0 ? 20 : 10); count++) {
-            if (count != 0) {
-                basic.pause(5);
-            }
-            fail_flag = 0;
-            // A high pulse of 1 microsecond followed by a low pulse indicates a reset.
-            pins.digitalWritePin(pin, 1)
-            delay_us(1)
-            pins.digitalWritePin(pin, 0)
-            basic.pause(18)
-            // After waiting for 18 milliseconds, raising the signal indicates the start.
-            pins.digitalWritePin(pin, 1) //pull up pin for 18us
-            delay_us(30)
-            pins.digitalReadPin(pin);
-            if (!(waitDigitalReadPin(1, 9999, pin))) continue;
-            if (!(waitDigitalReadPin(0, 9999, pin))) continue;
-            //read data (5 bytes)
-            let data_arr = [0, 0, 0, 0, 0];
-            let i, j;
-            for (i = 0; i < 5; i++) {
-                for (j = 0; j < 8; j++) {
-                    if (!(waitDigitalReadPin(0, 9999, pin))) {
-                        fail_flag = 1
-                        break;
-                    }
-                    if (!(waitDigitalReadPin(1, 9999, pin))) {
-                        fail_flag = 1
-                        break;
-                    }
-                    delay_us(40)
-                    //if sensor still pull up data pin after 28 us it means 1, otherwise 0
-                    if (pins.digitalReadPin(pin) == 1) {
-                        data_arr[i] |= 1 << (7 - j)
-                    }
-                }
-                if (fail_flag) break;
-            }
-            if (fail_flag) {
-                continue;
-            };
+        
+        return getCachedValue(dht11type);
+    }
 
-            if (data_arr[4] == ((data_arr[0] + data_arr[1] + data_arr[2] + data_arr[3]) & 0xFF)) {
-                __temperature = data_arr[2] + data_arr[3] / 100
-                __humidity = data_arr[0] + data_arr[1] / 100
-                __dht11_last_read_time = input.runningTime();
-                break;
-            }
-            fail_flag = 1;
+    /**
+     * Initialize the sensor
+     */
+    function initializeSensor(pin: DigitalPin): void {
+        // Wait for a 2-second stabilization time after the first power-on
+        basic.pause(2000);
+        
+        // Pre-read three times to stabilize the sensor
+        for (let i = 0; i < 3; i++) {
+            readSensorData(pin);
+            basic.pause(100);
         }
+    }
+
+    /**
+     * Read sensor data
+     */
+    function readSensorData(pin: DigitalPin): boolean {
+        pins.setPull(pin, PinPullMode.PullUp);
+        
+        for (let attempt = 0; attempt < 15; attempt++) {
+            if (attempt > 0) {
+                basic.pause(15); // retry interval
+
+            }
+            
+            let bits: number[] = [];
+            
+            // Send the start signal
+            pins.digitalWritePin(pin, 0);
+            basic.pause(18); // Stay at a low level for 18ms
+            pins.digitalWritePin(pin, 1);
+            delay_us(40);
+            
+            // Set the pin to pull-up
+            pins.setPull(pin, PinPullMode.PullUp);
+            
+            // Wait for the sensor response
+            if (!waitForPinState(0, 100, pin)) continue;
+            if (!waitForPinState(1, 100, pin)) continue;
+            
+            // Read 40-bit data
+            for (let i = 0; i < 40; i++) {
+                if (!waitForPinState(0, 70, pin)) break;
+                
+                // Measure the duration of the high level
+                let startTime = input.runningTimeMicros();
+                if (!waitForPinState(1, 100, pin)) break;
+                let duration = input.runningTimeMicros() - startTime;
+                
+                // Judgment bit value: 26-28us is 0,70 us is 1
+                bits.push(duration > 50 ? 1 : 0);
+            }
+            
+            if (bits.length !== 40) continue;
+            
+            // Parse data bytes
+            let data = parseDataBits(bits);
+            if (data && validateData(data)) {
+                // DHT11 data format: Humidity integer, humidity decimal, temperature integer, temperature decimal, checksum
+                __humidity = data[0];    // Integer part of humidity
+                __temperature = data[2]; // Integral part of temperature
+                __dht11_last_read_time = input.runningTime();
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Parse the data bit
+     */
+    function parseDataBits(bits: number[]): number[] | null {
+        let data = [0, 0, 0, 0, 0];
+        
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 8; j++) {
+                data[i] = (data[i] << 1) | bits[i * 8 + j];
+            }
+        }
+        
+        // checksum validation
+
+        let checksum = (data[0] + data[1] + data[2] + data[3]) & 0xFF;
+        if (data[4] !== checksum) {
+            return null;
+        }
+        
+        return data;
+    }
+
+    /**
+     * Data validity verification
+     */
+    function validateData(data: number[]): boolean {
+        let humidity = data[0];    // Humidity integer
+        let temperature = data[2]; // Temperature integer
+        
+        // Strict rationality checks
+        const isValidHumidity = humidity >= 0 && humidity <= 95;
+        const isValidTemperature = temperature >= -25 && temperature <= 60;
+        
+        return isValidHumidity && isValidTemperature;
+    }
+
+    /**
+     * Obtain the cache value
+     */
+    function getCachedValue(dht11type: DHT11Type): number {
+        // Define reasonable default values and ranges according to the DHT11 specification
+        const DEFAULT_TEMP_C = 25.0;    // Default room temperature
+        const DEFAULT_HUMIDITY = 50;    // Default value of moderate humidity
+        
         switch (dht11type) {
             case DHT11Type.DHT11_temperature_C:
-                return __temperature
+                // The temperature range of DHT11 is -25°C to +60°C
+                return (__temperature >= -25 && __temperature <= 60) ? 
+                       Math.round(__temperature * 10) / 10 : DEFAULT_TEMP_C;
+                
             case DHT11Type.DHT11_temperature_F:
-                return (__temperature * 1.8) + 32
+                // Convert to Fahrenheit temperature and verify the range as well
+                const tempC = (__temperature >= -25 && __temperature <= 60) ? 
+                             __temperature : DEFAULT_TEMP_C;
+                const tempF = tempC * 1.8 + 32;
+                return Math.round(tempF * 10) / 10;
+                
             case DHT11Type.DHT11_humidity:
-                return __humidity
+                // DHT11 Humidity range: 0% to 95% RH
+                return (__humidity >= 0 && __humidity <= 95) ? 
+                       Math.round(__humidity) : DEFAULT_HUMIDITY;
+                
             default:
-                return 0
+                return 0;
+        }
+    }
+
+    // The verification function dedicated to DHT11
+    function isValidDHT11Temperature(temp: number): boolean {
+        return temp >= -25 && temp <= 60 && temp !== -1;
+    }
+
+    function isValidDHT11Humidity(humid: number): boolean {
+        return humid >= 0 && humid <= 95 && humid !== -1;
+    }
+
+    /**
+     * Get the default value (returned when the read fails)
+     */
+    function getDefaultValue(dht11type: DHT11Type): number {
+        switch (dht11type) {
+            case DHT11Type.DHT11_temperature_C:
+                return 25; // A reasonable default temperature
+            case DHT11Type.DHT11_temperature_F:
+                return 77; // 25°C = 77°F
+            case DHT11Type.DHT11_humidity:
+                return 50; // Reasonable default humidity
+
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Wait for the pin status
+     */
+    function waitForPinState(expected: number, timeout_us: number, pin: DigitalPin): boolean {
+        let start = input.runningTimeMicros();
+        while (pins.digitalReadPin(pin) !== expected) {
+            if (input.runningTimeMicros() - start > timeout_us) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Microsecond delay
+     */
+    function delay_us(microseconds: number): void {
+        let start = input.runningTimeMicros();
+        while (input.runningTimeMicros() - start < microseconds) {
+            // Empty loop waiting
         }
     }
 
