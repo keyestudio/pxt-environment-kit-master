@@ -514,16 +514,6 @@ namespace Environment {
     }
 
     /**
-     * Microsecond delay
-     */
-    function delay_us(microseconds: number): void {
-        let start = input.runningTimeMicros();
-        while (input.runningTimeMicros() - start < microseconds) {
-            // Empty loop waiting
-        }
-    }
-
-    /**
      * Read PM2.5 dust concentration value (μg/m³) - Use the official Sharp formula
      * @param vLED LED control pin
      * @param vo Sensor output pin
