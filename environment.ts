@@ -305,16 +305,6 @@ namespace Environment {
     let __dht11_last_read_time: number = 0;
     let __sensor_initialized: boolean = false;
 
-    // DHT11 sensor type enumeration definition
-    enum DHT11Type {
-        //% block="temperature (°C)"
-        DHT11_temperature_C = 0,
-        //% block="temperature (°F)"
-        DHT11_temperature_F = 1, 
-         //% block="humidity (%RH)"
-         DHT11_humidity = 2
-    }
-
     /**
      * get dht11 temperature and humidity Value
      * @param dht11pin describe parameter here
@@ -322,19 +312,6 @@ namespace Environment {
     //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
     //% dht11type.fieldEditor="dropdown" dht11type.fieldOptions.columns=3
     export function dht11value(dht11type: DHT11Type, dht11pin: DigitalPin): number {
-        //initialize
-        if (__dht11_last_read_time != 0 && __dht11_last_read_time + 100 > input.runningTime()) {
-            switch (dht11type) {
-                case DHT11Type.DHT11_temperature_C:
-                    return __temperature
-                case DHT11Type.DHT11_temperature_F:
-                    return (__temperature * 1.8) + 32
-                case DHT11Type.DHT11_humidity:
-                    return __humidity
-                default:
-                    return 0
-            }
-        }
         // Sensor initialization
         if (!__sensor_initialized) {
             initializeSensor(dht11pin);
