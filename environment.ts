@@ -322,6 +322,19 @@ namespace Environment {
     //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
     //% dht11type.fieldEditor="dropdown" dht11type.fieldOptions.columns=3
     export function dht11value(dht11type: DHT11Type, dht11pin: DigitalPin): number {
+        //initialize
+        if (__dht11_last_read_time != 0 && __dht11_last_read_time + 100 > input.runningTime()) {
+            switch (dht11type) {
+                case DHT11Type.DHT11_temperature_C:
+                    return __temperature
+                case DHT11Type.DHT11_temperature_F:
+                    return (__temperature * 1.8) + 32
+                case DHT11Type.DHT11_humidity:
+                    return __humidity
+                default:
+                    return 0
+            }
+        }
         // Sensor initialization
         if (!__sensor_initialized) {
             initializeSensor(dht11pin);
