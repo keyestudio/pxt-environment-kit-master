@@ -305,10 +305,14 @@ namespace Environment {
     let __dht11_last_read_time: number = 0;
     let __sensor_initialized: boolean = false;
 
+    // DHT11 sensor type enumeration definition
     enum DHT11Type {
+        //% block="temperature (°C)"
         DHT11_temperature_C = 0,
-        DHT11_temperature_F = 1,
-        DHT11_humidity = 2
+        //% block="temperature (°F)"
+        DHT11_temperature_F = 1, 
+         //% block="humidity (%RH)"
+         DHT11_humidity = 2
     }
 
     /**
@@ -316,6 +320,7 @@ namespace Environment {
      * @param dht11pin describe parameter here
      */
     //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
+    //% dht11type.fieldEditor="dropdown" dht11type.fieldOptions.columns=3
     export function dht11value(dht11type: DHT11Type, dht11pin: DigitalPin): number {
         // Sensor initialization
         if (!__sensor_initialized) {
