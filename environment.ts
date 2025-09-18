@@ -412,8 +412,8 @@ namespace Environment {
             dust = (voltage - 0.0356) * 120000 * 0.035;
         }
         
-        // Make sure it is not a negative value.
-        return Math.max(0, dust);
+        // Make sure it is not a negative value, round to the nearest.
+        return Math.max(0, Math.round(dust));
     }
 
     /**
