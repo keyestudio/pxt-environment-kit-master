@@ -303,7 +303,6 @@ namespace Environment {
     let __temperature: number = 0; // Set the initial value to 0
     let __humidity: number = 0;    // Set the initial value to 0
     let __dht11_last_read_time: number = 0;
-    let __sensor_initialized: boolean = false;
 
     /**
      * get dht11 temperature and humidity Value
