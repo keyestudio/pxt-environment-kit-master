@@ -80,15 +80,16 @@ namespace Environment {
     let PHvalue: number[] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     let PHcnt = 0
 
+
     export enum DHT11Type {
-        //% block="temperature(℃)" enumval=0
-        DHT11_temperature_C,
+        //% block="temperature(℃)"
+        DHT11_temperature_C = 0,
 
-        //% block="temperature(℉)" enumval=1
-        DHT11_temperature_F,
+        //% block="temperature(℉)" 
+        DHT11_temperature_F = 1,
 
-        //% block="humidity(0~100)" enumval=2
-        DHT11_humidity,
+        //% block="humidity(%RH)"
+        DHT11_humidity = 2,
     }
 
     export enum BMP388_state {
@@ -300,15 +301,17 @@ namespace Environment {
     }
 
     // global variable
-    let __temperature: number = 0; // Set the initial value to 0
-    let __humidity: number = 0;    // Set the initial value to 0
+    let __temperature: number = -1;
+    let __humidity: number = -1;
     let __dht11_last_read_time: number = 0;
+    let __sensor_initialized: boolean = false;
 
     /**
      * get dht11 temperature and humidity Value
      * @param dht11pin describe parameter here
      */
     //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
+    //% weight=90
     //% dht11type.fieldEditor="dropdown" dht11type.fieldOptions.columns=3
     export function dht11value(dht11type: DHT11Type, dht11pin: DigitalPin): number {
         // Sensor initialization
@@ -471,15 +474,6 @@ namespace Environment {
             default:
                 return 0;
         }
-    }
-
-    // The verification function dedicated to DHT11
-    function isValidDHT11Temperature(temp: number): boolean {
-        return temp >= -25 && temp <= 60 && temp !== -1;
-    }
-
-    function isValidDHT11Humidity(humid: number): boolean {
-        return humid >= 0 && humid <= 95 && humid !== -1;
     }
 
     /**
