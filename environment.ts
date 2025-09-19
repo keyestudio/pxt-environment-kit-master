@@ -310,7 +310,7 @@ namespace Environment {
      * get dht11 temperature and humidity Value
      * @param dht11pin describe parameter here
      */
-    //% blockId="read_dht11" block="DHT11 value %dht11type at pin %pin"
+    //% blockId="readdht11" block="value of dht11 %dht11type| at pin %dht11pin"
     //% pin.fieldEditor="gridpicker" pin.fieldOptions.columns=4
     //% pin.fieldOptions.tooltips="false"
     //% dht11type.fieldEditor="dropdown" dht11type.fieldOptions.columns=3
@@ -334,7 +334,7 @@ namespace Environment {
         }
         
         return getCachedValue(dht11type)
-    }
+        }
 
         function initializeSensor(pin: DigitalPin): void {
             basic.pause(2000)
